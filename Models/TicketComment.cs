@@ -12,11 +12,11 @@ namespace TheBugTracker.Models
         public int Id { get; set; }
         //Comment
         
-        [DisplayName("Comment")]
+        [DisplayName("Member Comment")]
         public string Comment { get; set; }
         //Craeted
 
-        [DisplayName("Date Modified")]
+        [DisplayName("Date")]
         public DateTimeOffset Created { get; set; }
         //TicketID
         [DisplayName("Ticket")]
