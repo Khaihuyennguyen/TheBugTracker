@@ -13,6 +13,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TheBugTracker.Data;
 using TheBugTracker.Models;
+using TheBugTracker.Services;
+using TheBugTracker.Services.Interfaces;
 
 namespace TheBugTracker
 {
@@ -38,6 +40,10 @@ namespace TheBugTracker
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultUI()
                 .AddDefaultTokenProviders();
+
+            services.AddScoped<IBTRolesService, BTRolesService>();
+
+
 
             services.AddControllersWithViews();
         }
