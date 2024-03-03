@@ -21,6 +21,7 @@ namespace TheBugTracker.Services
         {
             _context.Add(project);
             await _context.SaveChangesAsync();
+
         }
 
         public Task<bool> AddProjectManagerAsync(string userId, int projectId)
