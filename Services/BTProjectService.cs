@@ -17,13 +17,15 @@ namespace TheBugTracker.Services
             _context = context;
 
         }
+
+        // CRUD - CREATE
         public async Task AddNewProjectAsync(Project project)
         {
             _context.Add(project);
             await _context.SaveChangesAsync();
 
         }
-
+       
         public Task<bool> AddProjectManagerAsync(string userId, int projectId)
         {
             throw new System.NotImplementedException();
@@ -33,7 +35,7 @@ namespace TheBugTracker.Services
         {
             throw new System.NotImplementedException();
         }
-
+        // CRUD - Archive (Delete)
         public async Task ArchiveProjectAsync(Project project)
         {
             project.Archived = true;
@@ -46,26 +48,57 @@ namespace TheBugTracker.Services
             throw new System.NotImplementedException();
         }
 
-        public Task<List<Project>> GetAllProjectsByCompany(int companyId)
+        public async Task<List<Project>> GetAllProjectsByCompany(int companyId)
         {
-            throw new System.NotImplementedException();
+            List<Project> projects = new();
+
+            projects =  await _context.Projects.Where(u => u.CompanyId == companyId)
+                                            .Include(u => u.Members)
+                                            .Include(p => p.Tickets)
+                                                .ThenInclude(t => t.Comments)
+                                             .Include(p => p.Tickets)
+                                                .ThenInclude(t => t.Attachments)
+                                            .Include(p => p.Tickets)
+                                                .ThenInclude(t => t.History)
+                                            .Include(p => p.Tickets)
+                                                .ThenInclude(t => t.Notifications)
+                                            .Include(p => p.Tickets)
+                                                .ThenInclude(t => t.DeveloperUser)
+                                            .Include(p => p.Tickets)
+                                                .ThenInclude(t => t.OwnerUser)
+                                            .Include(p => p.Tickets)
+                                                .ThenInclude(t => t.TicketStatus)
+                                            .Include(p => p.Tickets)
+                                                .ThenInclude(t => t.TicketPriority)
+                                            .Include(p => p.Tickets)
+                                                .ThenInclude(t => t.TicketType)
+                                            .Include(p => p.ProjectPriority)
+                                            .ToListAsync();
+            return projects;
+
         }
 
-        public Task<List<Project>> GetAllProjectsByPriority(int companyId, string priorityName)
+        public async Task<List<Project>> GetAllProjectsByPriority(int companyId, string priorityName)
         {
-            throw new System.NotImplementedException();
+            List<Project> projects = await GetAllProjectsByCompany(companyId);
+            int priorityId = await LookupProjectPriorityId(priorityName);
+
+            return projects.Where(p => p.ProjectPriorityId == priorityId).ToList();
+
         }
 
-        public Task<List<Project>> GetArchivedProjectsByCompany(int companyId)
+        public async Task<List<Project>> GetArchivedProjectsByCompany(int companyId)
         {
-            throw new System.NotImplementedException();
+            List<Project> projects = await GetAllProjectsByCompany(companyId);
+
+            return projects.Where(p => p.Archived == true).ToList();
         }
 
         public Task<List<BTUser>> GetDevelopersOnProjectAsync(int projectId)
         {
             throw new System.NotImplementedException();
         }
-
+        // CRUD - REad
         public async Task<Project> GetProjectByIdAsync(int projectId, int companyId)
         {
             Project project = await _context.Projects
@@ -106,9 +139,11 @@ namespace TheBugTracker.Services
             throw new System.NotImplementedException();
         }
 
-        public Task<int> LookupProjectPriorityId(string priorityName)
+        public async Task<int> LookupProjectPriorityId(string priorityName)
         {
-            throw new System.NotImplementedException();
+            int priorityId = (await _context.ProjectPriorities.FirstOrDefaultAsync(p => p.Name == priorityName)).Id;
+
+            return priorityId;
         }
 
         public Task RemoveProjectManagerAsync(int projectId)
@@ -125,7 +160,7 @@ namespace TheBugTracker.Services
         {
             throw new System.NotImplementedException();
         }
-
+        //CRUD - UPDATE
         public async Task UpdateProjectAsync(Project project)
         {
             _context.Update(project);
