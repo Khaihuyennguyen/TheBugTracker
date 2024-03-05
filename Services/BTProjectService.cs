@@ -52,7 +52,7 @@ namespace TheBugTracker.Services
         {
             List<Project> projects = new();
 
-            projects =  await _context.Projects.Where(u => u.CompanyId == companyId)
+            projects =  await _context.Projects.Where(u => u.CompanyId == companyId && u.Archived == false )
                                             .Include(u => u.Members)
                                             .Include(p => p.Tickets)
                                                 .ThenInclude(t => t.Comments)
