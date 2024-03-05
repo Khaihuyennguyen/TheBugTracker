@@ -43,7 +43,7 @@ namespace TheBugTracker
 
             services.AddScoped<IBTRolesService, BTRolesService>();
             services.AddScoped<IBTCompanyInfoService, BTCompanyInfoService>();
-
+            services.AddScoped<IBTProjectService, BTProjectService>();
 
             services.AddControllersWithViews();
         }
