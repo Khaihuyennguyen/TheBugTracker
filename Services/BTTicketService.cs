@@ -4,19 +4,33 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TheBugTracker.Models;
 using TheBugTracker.Services.Interfaces;
+using SQLitePCL;
+using TheBugTracker.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace TheBugTracker.Services
 {
     public class BTTicketService : IBTTicketService
     {
-        public Task AddNewTicketAsync(Ticket ticket)
+        private readonly ApplicationDbContext _context;
+
+        public BTTicketService(ApplicationDbContext context)
+        { 
+            _context = context;
+        }
+        public async Task AddNewTicketAsync(Ticket ticket)
         {
-            throw new System.NotImplementedException();
+
+            _context.Add(ticket);
+            await _context.SaveChangesAsync();
+            
         }
 
-        public Task ArchiveTicketAsync(Ticket ticket)
+        public async Task ArchiveTicketAsync(Ticket ticket)
         {
-            throw new System.NotImplementedException();
+            ticket.Archived = true;
+            _context.Update(ticket);
+            await _context.SaveChangesAsync();
         }
 
         public Task AssignTicketAsync(int ticketId, string userId)
@@ -69,9 +83,9 @@ namespace TheBugTracker.Services
             throw new System.NotImplementedException();
         }
 
-        public Task<Ticket> GetTicketByIdAsync(int ticketId)
+        public async Task<Ticket> GetTicketByIdAsync(int ticketId)
         {
-            throw new System.NotImplementedException();
+            return await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId);
         }
 
         public Task<BTUser> GetTicketDeveloperAsync(int ticketId)
@@ -104,9 +118,10 @@ namespace TheBugTracker.Services
             throw new System.NotImplementedException();
         }
 
-        public Task UpdateTicketAsync(Ticket ticket)
+        public async Task UpdateTicketAsync(Ticket ticket)
         {
-            throw new System.NotImplementedException();
+            _context.Update(ticket);
+            await _context.SaveChangesAsync();
         }
     }
 }
