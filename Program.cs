@@ -12,7 +12,7 @@ namespace TheBugTracker
 {
     public class Program
     {
-        public async static void Main(string[] args)
+        public async static Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
             await DataUtility.ManageDataAsync(host);
