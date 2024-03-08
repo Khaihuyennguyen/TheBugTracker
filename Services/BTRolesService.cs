@@ -96,17 +96,21 @@ namespace TheBugTracker.Services
             return result;
         }
 
+        #region Remove User From Role
         public async Task<bool> RemoveUserFromRoleAsync(BTUser user, string roleName)
         {
             bool result = (await _userManager.RemoveFromRoleAsync(user, roleName)).Succeeded;
             return result;
         }
+        #endregion
 
-        public async Task<bool> RemoveuserFromRolesAsync(BTUser user, IEnumerable<string> roles)
+        #region Remove User From Roles
+        public async Task<bool> RemoveUserFromRolesAsync(BTUser user, IEnumerable<string> roles)
         {
             bool result = (await _userManager.RemoveFromRolesAsync(user, roles)).Succeeded;
-
             return result;
         }
+        #endregion
+
     }
 }

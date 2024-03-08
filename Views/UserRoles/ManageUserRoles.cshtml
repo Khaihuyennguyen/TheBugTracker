@@ -18,7 +18,7 @@
       	    	<form asp-action="ManageUserRoles" asp-controller="UserRoles" method=post>   
                       <input type = "hidden" asp-for="@member.BTUser.Id" />
                       <div class="row">
-                          <div class=" ="col-6">
+                          <div class ="col-6">
                               <div class="form-group">
                                   <label asp-for="@member.Roles" class="custom-label">Roles for @member.BTUser.FullName</label>
                                   <select aps-for="@member.SelectedRoles"class="form-control" asp-items="@member.Roles" multiple>
