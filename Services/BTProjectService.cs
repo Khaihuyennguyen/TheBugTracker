@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TheBugTracker.Data;
@@ -94,9 +95,19 @@ namespace TheBugTracker.Services
         // CRUD - Archive (Delete)
         public async Task ArchiveProjectAsync(Project project)
         {
-            project.Archived = true;
-            _context.Update(project);
-            await _context.SaveChangesAsync();
+            try
+            {
+                project.Archived = true;
+                _context.Update(project);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            
+            
         }
 
         public async Task<List<BTUser>> GetAllProjectMembersExceptPMAsync(int projectId)
