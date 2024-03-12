@@ -1,5 +1,5 @@
 ﻿@model TheBugTracker.Models.ViewModels.AddProjectWithPMViewModels
-
+@using TheBugTracker.Models.Enums
 @{
     ViewData["Title"] = "Create";
 }
@@ -56,13 +56,16 @@
                 <img id="imageFileData" class="img-fluid img-thumbnail" src="" />
 
             }
-            
-            <div class="form-group">
-                <label class="control-label">Project Manager</label>
-                <select asp-for="PmId" class="form-control" asp-items="@Model.PMList">
-                    <option ></option>
-                </select>
-            </div>
+
+            @if (User.IsInRole(Roles.Admin.ToString()))
+            {
+                <div class="form-group">
+                    <label class="control-label">Project Manager</label>
+                    <select asp-for="PmId" class="form-control" asp-items="@Model.PMList">
+                        <option></option>
+                    </select>
+                </div>
+            }
        
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
