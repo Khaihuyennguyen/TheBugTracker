@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -61,6 +62,18 @@ namespace TheBugTracker.Controllers
                 return View(tickets);
             }
         }
+
+        public async Task<IActionResult> ArchivedTickets()
+        {
+            int compnayId = User.Identity.GetCompanyId().Value;
+
+            List<Ticket> tickets = await _ticketService.GetArchivedTicketsAsync(compnayId);
+
+            return View(tickets);
+        }
+
+        //GET: Tickets/Unassigned/5
+        [Authorize(Roles = "Admin,ProjectManager")]
         // GET: Tickets/Details/5
         public async Task<IActionResult> Details(int? id)
         {
