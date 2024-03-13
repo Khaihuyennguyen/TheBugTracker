@@ -53,11 +53,10 @@ namespace TheBugTracker.Controllers
         // GET: Tickets/Create
         public IActionResult Create()
         {
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id");
-            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "Id");
+            
             ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name");
             ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Id");
-            ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Id");
+
             ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Id");
             return View();
         }
