@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TheBugTracker.Extensions;
 namespace TheBugTracker.Models
 {
     public class TicketAttachment
@@ -19,8 +20,14 @@ namespace TheBugTracker.Models
         public string UserId { get; set; }
         [DisplayName("File description")]
         public string Description {  get; set; }
-        [NotMapped] // This will not be copied to the database
+      
+
+
+        [NotMapped]
+        [DisplayName("Select a file")]
         [DataType(DataType.Upload)]
+        [MaxFileSize(1024 * 1024)]
+        [AllowedExtensions(new string[] { ".jpg", ".png", ".doc", ".docx", ".xls", ".xlsx", ".pdf" })]
         public IFormFile FormFile { get; set; }
         [DisplayName("File Name")]
         public string FileName { get; set; }
