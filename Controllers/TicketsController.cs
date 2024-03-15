@@ -97,7 +97,34 @@ namespace TheBugTracker.Controllers
 
             return View(ticket);
         }
+        [Authorize(Roles="Admin,ProjectManager")]
+        public async Task<IActionResult> UnassignedTickets()
+        {
+            int compnayId = User.Identity.GetCompanyId().Value;
+            string btUserId = _userManager.GetUserId(User);
 
+
+            List<Ticket> tickets = await _ticketService.GetUnassignedTicketsAsync(compnayId);
+
+            if(User.IsInRole(nameof(Roles.Admin)))
+            {
+                return View(tickets);
+            }
+            else
+            {
+                List<Ticket> pmTickets = new();
+                foreach(Ticket ticket in tickets)
+                {
+                    if(await _projectService.IsAssignedProjectManagerAsync(btUserId, ticket.Id))
+                    {
+                        pmTickets.Add(ticket);
+                    }
+                }
+
+                return View(pmTickets);
+            }
+            return View(tickets);
+        }
         // GET: Tickets/Create
         public async Task<IActionResult> Create()
         {
