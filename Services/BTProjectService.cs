@@ -33,31 +33,32 @@ namespace TheBugTracker.Services
 
         public async Task<bool> AddProjectManagerAsync(string userId, int projectId)
         {
-            BTUser currentProjectManager = await GetProjectManagerAsync(projectId);
+            BTUser currentPM = await GetProjectManagerAsync(projectId);
 
-            //remove current pm if project already has one.
-            if (currentProjectManager != null)
+            //Remove the current PN if necessary
+            if (currentPM != null)
             {
                 try
                 {
                     await RemoveProjectManagerAsync(projectId);
                 }
-                catch (Exception exception)
+                catch (Exception ex)
                 {
-                    Console.WriteLine($"Error removing current Project Manager. - Error: {exception.Message}");
-                    throw;
+                    Console.WriteLine($"Error removing current PM, - Error:{ex.Message}");
+                    return false;
                 }
             }
 
+            // Add the new PM
             try
             {
                 await AddUserToProjectAsync(userId, projectId);
                 return true;
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Error adding new Project Manager. - Error : {exception.Message}");
-                throw;
+                Console.WriteLine($"Error adding new PM - Error: {ex.Message}");
+                return false;
             }
         }
 
@@ -231,7 +232,7 @@ namespace TheBugTracker.Services
 
         public async Task<BTUser> GetProjectManagerAsync(int projectId)
         {
-            Project project = await _context.Projects.Include(p=>p.Members).FirstOrDefaultAsync(p => p.Id != projectId);
+            Project project = await _context.Projects.Include(p=>p.Members).FirstOrDefaultAsync(p => p.Id == projectId);
 
             foreach(BTUser member in project?.Members)
             {
