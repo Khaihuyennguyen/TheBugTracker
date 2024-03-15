@@ -25,7 +25,7 @@ namespace TheBugTracker.Controllers
         private readonly UserManager<BTUser> _userManager;
         private readonly IBTCompanyInfoService _companyInfoService;
 
-        public ProjectsController(ApplicationDbContext context, 
+        public ProjectsController(ApplicationDbContext context,
                                   IBTRolesService rolesService,
                                   IBTLookupService lookupService,
                                   IBTFileService fileService,
@@ -65,7 +65,7 @@ namespace TheBugTracker.Controllers
 
             int companyId = User.Identity.GetCompanyId().Value;
 
-            if(User.IsInRole(nameof(Roles.Admin)) || User.IsInRole(nameof(Roles.ProjectManager)))
+            if (User.IsInRole(nameof(Roles.Admin)) || User.IsInRole(nameof(Roles.ProjectManager)))
             {
                 projects = await _companyInfoService.GetAllProjectsAsync(companyId);
             }
@@ -84,6 +84,14 @@ namespace TheBugTracker.Controllers
 
             List<Project> projects = await _projectService.GetArchivedProjectsByCompanyAsync(companyId);
 
+            return View(projects);
+        }
+
+        public async Task<IActionResult> UnassignedProjects()
+        {
+            int companyId = User.Identity.GetCompanyId().Value;
+            List<Project> projects = new();
+            projects = await _projectService.GetUnassignedProjectsAsync(companyId);
             return View(projects);
         }
         // GET: Projects/Details/5
