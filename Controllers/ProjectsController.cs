@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -94,7 +95,8 @@ namespace TheBugTracker.Controllers
             projects = await _projectService.GetUnassignedProjectsAsync(companyId);
             return View(projects);
         }
-
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
         public async Task<IActionResult> AssignPM(int projectId)
         {
             int companyId = User.Identity.GetCompanyId().Value;
@@ -104,8 +106,20 @@ namespace TheBugTracker.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignPM(AssignPMViewModel model)
+        {
+            if(!string.IsNullOrEmpty(model.PMID))
+            {
+                await _projectService.AddProjectManagerAsync(model.PMID, model.Project.Id);
 
+                return RedirectToAction(nameof(Details), new { id = model.Project.Id });
+            }
 
+            return RedirectToAction(nameof(AssignPM), new {projectId = model.Project.Id});
+        }
 
         // GET: Projects/Details/5
         public async Task<IActionResult> Details(int? id)
