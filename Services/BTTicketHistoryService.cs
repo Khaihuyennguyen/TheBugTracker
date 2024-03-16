@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TheBugTracker.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using SQLitePCL;
 using TheBugTracker.Data;
@@ -18,7 +19,7 @@ namespace TheBugTracker.Services
             _context = context;
         }
         
-        public async Task AddhistoryAsync(Ticket oldTicket, Ticket newTicket, string userId)
+        public async Task AddHistoryAsync(Ticket oldTicket, Ticket newTicket, string userId)
         {
             // NEw ticket has beed added
             if (oldTicket == null && newTicket != null)
@@ -190,7 +191,7 @@ namespace TheBugTracker.Services
             }
         }
 
-
+        
 
         public async Task<List<TicketHistory>> GetCompanyTickethistoriesAsync(int companyId)
         {
@@ -213,6 +214,11 @@ namespace TheBugTracker.Services
 
                 throw;
             }
+        }
+
+        public Task<List<TicketHistory>> GetCompanyTicketsHistoriesAsync(int companyId)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<List<TicketHistory>> GetProjectTicketsHistoriesAsync(int projectId, int companyId)
