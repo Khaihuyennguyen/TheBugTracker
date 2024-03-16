@@ -121,6 +121,57 @@ namespace TheBugTracker.Controllers
             return RedirectToAction(nameof(AssignPM), new {projectId = model.Project.Id});
         }
 
+
+        [HttpGet]
+
+        public async Task<IActionResult> AssignMembers(int id)
+        {
+            ProjectMembersViewModel model = new();
+
+            int companyId = User.Identity.GetCompanyId().Value;
+
+            model.Project = await _projectService.GetProjectByIdAsync(id, companyId);
+
+            List<BTUser> developers = await _rolesService.GetUsersInRoleAsync(nameof(Roles.Developer), companyId);
+            List<BTUser> submitters = await _rolesService.GetUsersInRoleAsync(nameof(Roles.Submitter), companyId);
+
+            List<BTUser> companyMembers = developers.Concat(submitters).ToList();
+
+            List<string> projectsMembers = model.Project.Members.Select(m => m.Id).ToList();
+
+            model.Users = new MultiSelectList(companyMembers, "Id", "FullName", projectsMembers);
+
+            return View(model);
+
+        }
+
+        //POST: Projects/Assign Members
+        [Authorize(Roles = "Admin, ProjectManager")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignMembers(ProjectMembersViewModel model)
+        {
+            if (model.SelectedUsers != null)
+            {
+                List<string> memberIds = (await _projectService.GetAllProjectMembersExceptPMAsync(model.Project.Id)).Select(m => m.Id).ToList();
+
+                //Remove current members
+                foreach (string member in memberIds)
+                {
+                    await _projectService.RemoveUserFromProjectAsync(member, model.Project.Id);
+                }
+
+                //Add selected members
+                foreach (string member in model.SelectedUsers)
+                {
+                    await _projectService.AddUserToProjectAsync(member, model.Project.Id);
+                }
+
+                //go to project details
+                return RedirectToAction("Details", "Projects", new { id = model.Project.Id });
+            }
+            return RedirectToAction(nameof(AssignMembers), new { id = model.Project.Id });
+        }
         // GET: Projects/Details/5
         public async Task<IActionResult> Details(int? id)
         {
