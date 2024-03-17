@@ -20,6 +20,7 @@ using TheBugTracker.Services.Interfaces;
 
 namespace TheBugTracker.Controllers
 {
+    [Authorize]
     public class TicketsController : Controller
     {
  
@@ -76,7 +77,7 @@ namespace TheBugTracker.Controllers
         }
 
         //GET: Tickets/Unassigned/5
-        [Authorize(Roles = "Admin,ProjectManager")]
+        
         // GET: Tickets/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -123,28 +124,8 @@ namespace TheBugTracker.Controllers
             }
             return View(tickets);
         }
-        // GET: Tickets/Create
-        public async Task<IActionResult> Create()
-        {
-            BTUser btUser = await _userManager.GetUserAsync(User);
-            int companyId = User.Identity.GetCompanyId().Value;
 
-            if(User.IsInRole(nameof(Roles.Admin)))
-            {
-                ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsByCompany(companyId), "Id", "Name");
-            }
-            else
-            {
-                ViewData["ProjectId"] = new SelectList(await _projectService.GetUserProjectsAsync(btUser.Id), "Id", "Name");
-            }
-
-     
-            ViewData["TicketPriorityId"] = new SelectList(await _lookupService.GetTicketPrioritiesAsync(), "Id", "Name");
-
-            ViewData["TicketTypeId"] = new SelectList(await _lookupService.GetTicketTypesAsync(), "Id", "Name");
-
-            return View();
-        }
+        [Authorize(Roles = "Admin,ProjectManager")]
         [HttpGet]
         public async Task<IActionResult> AssignDeveloper(int id)
         {
@@ -186,6 +167,29 @@ namespace TheBugTracker.Controllers
             }
             return RedirectToAction(nameof(AssignDeveloper), new { id = model.Ticket.Id });
         }
+        // GET: Tickets/Create
+        public async Task<IActionResult> Create()
+        {
+            BTUser btUser = await _userManager.GetUserAsync(User);
+            int companyId = User.Identity.GetCompanyId().Value;
+
+            if(User.IsInRole(nameof(Roles.Admin)))
+            {
+                ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsByCompany(companyId), "Id", "Name");
+            }
+            else
+            {
+                ViewData["ProjectId"] = new SelectList(await _projectService.GetUserProjectsAsync(btUser.Id), "Id", "Name");
+            }
+
+     
+            ViewData["TicketPriorityId"] = new SelectList(await _lookupService.GetTicketPrioritiesAsync(), "Id", "Name");
+
+            ViewData["TicketTypeId"] = new SelectList(await _lookupService.GetTicketTypesAsync(), "Id", "Name");
+
+            return View();
+        }
+        
         // POST: Tickets/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -322,47 +326,6 @@ namespace TheBugTracker.Controllers
 
             return RedirectToAction("Details", new { id = ticketComment.TicketId });
         }
-
-
-        // GET: Tickets/Restore/5
-        public async Task<IActionResult> Restore(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-         
-
-            Ticket ticket = await _ticketService.GetTicketByIdAsync(id.Value);
-
-            if (ticket == null)
-            {
-                return NotFound();
-            }
-
-            return View(ticket);
-        }
-
-        // POST: Tickets/Restore/5
-        [HttpPost, ActionName("Restore")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RestoreConfirmed(int id)
-        {
-            Ticket ticket = await _ticketService.GetTicketByIdAsync(id);
-            ticket.Archived = false;
-            await _ticketService.UpdateTicketAsync(ticket);
-
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        private async Task<bool> TicketExists(int id)
-        {
-            int companyId = User.Identity.GetCompanyId().Value;
-
-            return (await _ticketService.GetAllTicketsByCompanyAsync(companyId)).Any(t => t.Id == id);
-        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddTicketAttachment([Bind("Id,FormFile,Description,TicketId")] TicketAttachment ticketAttachment)
@@ -411,5 +374,79 @@ namespace TheBugTracker.Controllers
             Response.Headers.Add("Content-Disposition", $"inline; filename={fileName}");
             return File(fileData, $"application/{ext}");
         }
+        // GET: Tickets/Restore/5
+
+        // GET: Tickets/Archived/5
+        [Authorize(Roles = "Admin, ProjectManager")]
+        public async Task<IActionResult> Archive(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Ticket ticket = await _ticketService.GetTicketByIdAsync(id.Value);
+
+            if (ticket == null)
+            {
+                return NotFound();
+            }
+
+            return View(ticket);
+        }
+
+        // POST: Tickets/Archive/5
+        [Authorize(Roles = "Admin, ProjectManager")]
+        [HttpPost, ActionName("Archive")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ArchiveConfirmed(int id)
+        {
+            Ticket ticket = await _ticketService.GetTicketByIdAsync(id);
+            ticket.Archived = true;
+            await _ticketService.UpdateTicketAsync(ticket);
+
+            return RedirectToAction(nameof(Index));
+        }
+        [Authorize(Roles = "Admin, ProjectManager")]
+        public async Task<IActionResult> Restore(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+         
+
+            Ticket ticket = await _ticketService.GetTicketByIdAsync(id.Value);
+
+            if (ticket == null)
+            {
+                return NotFound();
+            }
+
+            return View(ticket);
+        }
+
+        [Authorize(Roles = "Admin, ProjectManager")]
+        [HttpPost, ActionName("Restore")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RestoreConfirmed(int id)
+        {
+            Ticket ticket = await _ticketService.GetTicketByIdAsync(id);
+            ticket.Archived = false;
+            await _ticketService.UpdateTicketAsync(ticket);
+
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private async Task<bool> TicketExists(int id)
+        {
+            int companyId = User.Identity.GetCompanyId().Value;
+
+            return (await _ticketService.GetAllTicketsByCompanyAsync(companyId)).Any(t => t.Id == id);
+        }
+        
+        
     }
 }
